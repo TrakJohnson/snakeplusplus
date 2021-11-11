@@ -12,7 +12,7 @@
 #include "internals.h"
 
 // TODO
-// - fix frames
+// # fix frames
 // - add animation for eating
 // - menu
 // - 2 players
@@ -143,7 +143,7 @@ void startGame(const int &nx, const int &ny,
 
     backgroundClear();
     add_snake(snake, bg, nx, ny);
-    printFrame(nx, ny, bg, points);
+    printFrame(nx, ny, bg, points, frameLength, slowMult);
     remove_snake(snake, bg, nx, ny);
     update_snake_coordinates(snake, dxdy, nx, ny);
     
@@ -156,7 +156,7 @@ void startGame(const int &nx, const int &ny,
     bool eat = eatFood(food, snake);
     if (eat) {
       points += 1;
-      slowMult -= points % 2;  // accélère tous les 2
+      slowMult -= (points % 3) / 2;  // accélère tous les 3
       createFood(bg, food, nx, ny);
       snake.push_back({-1, -1});
     }
@@ -168,7 +168,7 @@ int main() {
   const int nx = 40;
   const int ny = 25;
 
-  std::vector<int> background(nx * ny, 0g);
+  std::vector<int> background(nx * ny, 0);
   std::vector<std::pair<int, int>> snake;
   
   backgroundSetup(nx, ny, background);
