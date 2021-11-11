@@ -41,7 +41,7 @@ Le programme comporte deux tableaux que l'on se trimballe partout :
 Il s'agit de tableau unidimensionel qui nous permettent de stocker des valeurs 2D `(x, y)`. 
 Le tableau `background` contient les valeurs associées à chaque point de la grille `nx*ny`. Pour accéder à l'élement `(i,j)` avec `i` l'indice des abscisses et `j` l'indice des ordonnées la relation est la suivante : 
 
-$$val_{ij} = background[ i + j*nx ]$$
+$$ val_{ij} = background[ i + j*nx ] $$
 
 Tandis que le tableau `snake` permet de stocker la position `(x,y)` de chaque élément du serpent. Pour obtenir les coordonnées `(x,y)` du `i`-ème élément du serpent il suffit de faire (merci le C++17): 
 
