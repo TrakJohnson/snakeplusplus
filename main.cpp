@@ -1,6 +1,7 @@
 #include "sys/ioctl.h"
 #include <array>
 #include <iostream>
+#include <ostream>
 #include <vector>
 
 #include "stdlib.h"
@@ -14,7 +15,7 @@
 // - fix frames
 // - add animation for eating
 // - menu
-// 
+// - 2 players
 
 
 void backgroundSetup(const int nx, const int ny, std::vector<int> &bg) {
@@ -119,14 +120,14 @@ void update_snake_coordinates(std::vector<std::pair<int, int>> &snake,
   snake[0] = {nouveau_x, nouveau_y};
 }
 
-void startGame(const int &lap, const int &nx, const int &ny,
+void startGame(const int &nx, const int &ny,
                std::vector<std::pair<int, int>> &snake, std::vector<int> &bg) {
   char key;
   std::array<int, 2> dxdy{-1, 0};
   std::array<int, 2> food{0, 0};
   int points = 0;
-  const int frameLength = 50;
-  int slowMult = 4;
+  const int frameLength = 16;
+  int slowMult = 10;
 
   createFood(bg, food, nx, ny);
 
@@ -138,14 +139,14 @@ void startGame(const int &lap, const int &nx, const int &ny,
         std::cin >> key;
         dxdy = snake_movement(key, dxdy[0], dxdy[1]);
       }
-      // TODO: probablement pas besoin de redessiner le snake à chaque fois
-      backgroundClear();
-      add_snake(snake, bg, nx, ny);
-      printFrame(nx, ny, bg, points);
-      remove_snake(snake, bg, nx, ny);
     }
 
-    // opération seulement mouvement snake
+    backgroundClear();
+    add_snake(snake, bg, nx, ny);
+    printFrame(nx, ny, bg, points);
+    remove_snake(snake, bg, nx, ny);
+    update_snake_coordinates(snake, dxdy, nx, ny);
+    
     bool out = verifyBorder(snake, nx, ny);
     if (out == false) {
       std::cerr << "t'es mort" << std::endl;
@@ -154,11 +155,11 @@ void startGame(const int &lap, const int &nx, const int &ny,
 
     bool eat = eatFood(food, snake);
     if (eat) {
-      points += 10;
+      points += 1;
+      slowMult -= points % 2;  // accélère tous les 2
       createFood(bg, food, nx, ny);
       snake.push_back({-1, -1});
     }
-    update_snake_coordinates(snake, dxdy, nx, ny);
   }
 }
 
@@ -166,14 +167,13 @@ int main() {
   const int snake_init_sz = 3;
   const int nx = 40;
   const int ny = 25;
-  int lap = 200;
 
-  std::vector<int> background(nx * ny, -1);
-
+  std::vector<int> background(nx * ny, 0g);
   std::vector<std::pair<int, int>> snake;
+  
   backgroundSetup(nx, ny, background);
   setupSnake(snake, snake_init_sz);
-
-  startGame(lap, nx, ny, snake, background);
+  startGame(nx, ny, snake, background);
+  
   return EXIT_SUCCESS;
 }
