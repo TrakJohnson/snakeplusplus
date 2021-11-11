@@ -1,4 +1,5 @@
 #include "stdlib.h"
+#include <array>
 #include <iostream>
 #include <vector>
 
@@ -12,47 +13,37 @@ void backgroundClear() {
   }
 }
 
-void printFrame(const int &nx, const int &ny, const std::vector<int> &bg, int points) {
+void printFrame(const int &nx, const int &ny, const std::vector<int> &bg,
+                int points) {
 
-   
-  std::vector<std::string> titre = {"  ██████  ███▄    █  ▄▄▄       ██ ▄█▀▓█████ ",
-    "▒██    ▒  ██ ▀█   █ ▒████▄     ██▄█▒ ▓█   ▀ ",
-    "░ ▓██▄   ▓██  ▀█ ██▒▒██  ▀█▄  ▓███▄░ ▒███   ",
-    "  ▒   ██▒▓██▒  ▐▌██▒░██▄▄▄▄██ ▓██ █▄ ▒▓█  ▄ ",
-    "▒██████▒▒▒██░   ▓██░ ▓█   ▓██▒▒██▒ █▄░▒████▒",
-    "▒ ▒▓▒ ▒ ░░ ▒░   ▒ ▒  ▒▒   ▓▒█░▒ ▒▒ ▓▒░░ ▒░ ░",
-    "░ ░▒  ░ ░░ ░░   ░ ▒░  ▒   ▒▒ ░░ ░▒ ▒░ ░ ░  ░",
-    "░  ░  ░     ░   ░ ░   ░   ▒   ░ ░░ ░    ░   ",
-    "      ░           ░       ░  ░░  ░      ░  ░", 
-    ""};
+  std::array<std::string, 10> titre = {
+      "  ██████  ███▄    █  ▄▄▄       ██ ▄█▀▓█████ ",
+      "▒██    ▒  ██ ▀█   █ ▒████▄     ██▄█▒ ▓█   ▀ ",
+      "░ ▓██▄   ▓██  ▀█ ██▒▒██  ▀█▄  ▓███▄░ ▒███   ",
+      "  ▒   ██▒▓██▒  ▐▌██▒░██▄▄▄▄██ ▓██ █▄ ▒▓█  ▄ ",
+      "▒██████▒▒▒██░   ▓██░ ▓█   ▓██▒▒██▒ █▄░▒████▒",
+      "▒ ▒▓▒ ▒ ░░ ▒░   ▒ ▒  ▒▒   ▓▒█░▒ ▒▒ ▓▒░░ ▒░ ░",
+      "░ ░▒  ░ ░░ ░░   ░ ▒░  ▒   ▒▒ ░░ ░▒ ▒░ ░ ░  ░",
+      "░  ░  ░     ░   ░ ░   ░   ▒   ░ ░░ ░    ░   ",
+      "      ░           ░       ░  ░░  ░      ░  ░",
+      ""};
 
-  for (std::string s: titre) {
-    // int i = (int)((nx - s.size())/2);
-    // std::cout << i << std::endl;
-    std::cout << std::string((2*nx - 44)/2, ' ') << s << std::endl;
+  for (std::string s : titre) {
+    // TODO: remplacer 44...
+    std::cout << std::string((2 * nx - 44) / 2, ' ') << s << std::endl;
   }
+
+  std::array<std::string, 5> couleurs{
+    "　",                     // vide
+    "\x1b[0;37;40m　\x1b[0m", // murs
+    "\x1b[1;37;41m　\x1b[0m", // nourriture
+    "\x1b[6;30;42m　\x1b[0m", // corps
+    "\x1b[1;37;44m　\x1b[0m"  // tête
+  };
 
   for (int j = 0; j < ny; j++) {
     for (int i = 0; i < nx; i++) {
-      if (bg[i + j * nx] == 1) {
-        std::cout << "\x1b[0;37;40m"
-                  << "　"
-                  << "\x1b[0m";
-      } else if (bg[i + j * nx] == 2) {
-        std::cout << "\x1b[1;37;41m"
-                  << "　"
-                  << "\x1b[0m";
-      } else if (bg[i + j * nx] == 3) {
-        std::cout << "\x1b[6;30;42m"
-                  << "　"
-                  << "\x1b[0m";
-      } else if (bg[i + j * nx] == 4) {
-        std::cout << "\x1b[1;37;44m"
-                  << "　"
-                  << "\x1b[0m";
-      } else {
-        std::cout << "　";
-      }
+      std::cout << couleurs.at(bg.at(i + j * nx));
     }
     std::cout << std::endl;
   }

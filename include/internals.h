@@ -1,7 +1,6 @@
+namespace internal {
 
-namespace internal{
+int keyEvent();
+void frameSleep(const int &);
 
-    int keyEvent();
-    void frameSleep(const int&);
-
-}
+} // namespace internal
