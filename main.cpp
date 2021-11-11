@@ -1,5 +1,6 @@
 #include "sys/ioctl.h"
 #include <array>
+#include <cstdlib>
 #include <iostream>
 #include <ostream>
 #include <vector>
@@ -10,6 +11,7 @@
 #include "display.h"
 #include "food.h"
 #include "internals.h"
+#include "menu_snake.h"
 
 // TODO
 // # fix frames
@@ -51,7 +53,7 @@ void remove_snake(const std::vector<std::pair<int, int>> &snake,
 }
 
 
-std::array<int, 2> snake_movement(const char &k, int dx, int dy) {
+std::array<int, 2> snakeMovement(const char &k, int dx, int dy) {
   int dx_new = 0;
   int dy_new = 0;
   if (k == 'd' || k == '6') {
@@ -137,7 +139,7 @@ void startGame(const int &nx, const int &ny,
       internal::frameSleep(frameLength);
       if (internal::keyEvent()) {
         std::cin >> key;
-        dxdy = snake_movement(key, dxdy[0], dxdy[1]);
+        dxdy = snakeMovement(key, dxdy[0], dxdy[1]);
       }
     }
 
@@ -170,10 +172,23 @@ int main() {
 
   std::vector<int> background(nx * ny, 0);
   std::vector<std::pair<int, int>> snake;
+
+  printCenteredLine(std::string("Test"));
   
-  backgroundSetup(nx, ny, background);
-  setupSnake(snake, snake_init_sz);
-  startGame(nx, ny, snake, background);
-  
+  std::vector<std::string> choices {
+    "1 joueur",
+    "2 joueurs",
+    "Quit"
+  };
+  int choice {menuSelect(choices)};
+
+  if (choice == 0) {
+    backgroundSetup(nx, ny, background);
+    setupSnake(snake, snake_init_sz);
+    startGame(nx, ny, snake, background);
+  } else if (choice == 2) {
+    return EXIT_SUCCESS;
+  }
+
   return EXIT_SUCCESS;
 }
