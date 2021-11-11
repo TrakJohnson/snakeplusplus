@@ -1,6 +1,13 @@
+# lsp mode et clangd
+.cache/
 .ccls
-build/
+compile_commands.json
+
+# emacs
 **/#*
 **/*~
+
+# cpp
+build/
 **/*.a
 snake
