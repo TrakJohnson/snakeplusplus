@@ -2,7 +2,7 @@
 
 Petit projet snake dans le terminal.
 
-https://raw.githubusercontent.com/TrakJohnson/snakeplusplus/master/demo.mp4
+![](demo.mp4)
 
 ## TODO
 
