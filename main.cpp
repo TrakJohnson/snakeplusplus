@@ -4,6 +4,7 @@
 #include <iostream>
 #include <ostream>
 #include <vector>
+#include <queue>
 
 #include "stdlib.h"
 
@@ -46,7 +47,7 @@ void remove_snake(const std::vector<std::pair<int, int>> &snake,
   }
 }
 
-std::array<int, 2> snakeMovement(const char &k, int dx, int dy) {
+void snakeMovement(const char &k, std::queue<std::array<int, 2>> &dxdy_queue) {
   int dx_new = 0;
   int dy_new = 0;
   if (k == 'd' || k == '6') {
@@ -63,13 +64,12 @@ std::array<int, 2> snakeMovement(const char &k, int dx, int dy) {
     dy_new = -1;
   }
 
-  std::array<int, 2> dxdy_old{dx, dy};
+  // must compare to queue.back() to get desired behaviour
+  auto [dx, dy] = dxdy_queue.back();
   // empêche l'utilisateur de se rentrer dedans "sur place"
-  if (dx_new * dx != 0 || dy_new * dy != 0) {
-    return dxdy_old;
+  if (dx_new * dx == 0 && dy_new * dy == 0) {
+    dxdy_queue.push(std::array<int, 2>{dx_new, dy_new});
   }
-  std::array<int, 2> dxdy{dx_new, dy_new};
-  return dxdy;
 }
 
 bool verifyBorder(const std::vector<std::pair<int, int>> &snake, int nx,
@@ -121,12 +121,19 @@ int speedToSlowMult(double s, int frameLength) {
 
 void startGame(const int &nx, const int &ny,
                std::vector<std::pair<int, int>> &snake, std::vector<int> &bg) {
+
   char key;
-  std::array<int, 2> dxdy{-1, 0};
+
+  // we use a movement queue instead of a single variable
+  // this allows the user to chain movements when the snake is in low speed
+  // and avoid eating yourself accidentally in between movement frames
+  std::queue<std::array<int, 2>> dxdy_queue;
+  dxdy_queue.push({-1, 0});
+  
   std::array<int, 2> food{0, 0};
   int points = 0;
   const int frameLength = 16;
-  double speed{6.0};
+  double speed{5.5};
   int slowMult{speedToSlowMult(speed, frameLength)};
 
   createFood(bg, food, nx, ny);
@@ -137,7 +144,8 @@ void startGame(const int &nx, const int &ny,
       internal::frameSleep(frameLength);
       if (internal::keyEvent()) {
         std::cin >> key;
-        dxdy = snakeMovement(key, dxdy[0], dxdy[1]);
+	// modifies the queue inplace
+        snakeMovement(key, dxdy_queue);
       }
     }
 
@@ -145,10 +153,15 @@ void startGame(const int &nx, const int &ny,
     add_snake(snake, bg, nx, ny);
     printFrame(nx, ny, bg, points, frameLength, speed);
     remove_snake(snake, bg, nx, ny);
-    update_snake_coordinates(snake, dxdy, nx, ny);
+
+    if (dxdy_queue.size() > 1) {
+      dxdy_queue.pop();
+    }
+    update_snake_coordinates(snake, dxdy_queue.front(), nx, ny);
 
     bool out = verifyBorder(snake, nx, ny);
     if (out == false) {
+      // TODO : proper death screen
       std::cerr << "t'es mort" << std::endl;
       exit(1);
     }
