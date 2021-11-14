@@ -5,6 +5,8 @@
 #include <ostream>
 #include <vector>
 #include <queue>
+#include <cstdlib>
+#include <ctime>
 
 #include "stdlib.h"
 
@@ -184,6 +186,9 @@ int main() {
   const int nx = 40;
   const int ny = 25;
 
+  // change the rand seed each time
+  srand((int) time(0));
+  
   std::vector<int> background(nx * ny, 0);
   std::vector<std::pair<int, int>> snake;
 
