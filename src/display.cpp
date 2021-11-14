@@ -67,7 +67,7 @@ std::string paddingFill(std::string &s, int finalLength) {
 
 std::string colorize(std::string s, std::string color) {
   std::map<std::string, std::string> colors = {
-      {"orange_highlight", "\e[4;37;43m"}, {"pink_highlight", "\e[7;35;47m"},
+      {"orange_highlight", "\e[7;33;40m"}, {"pink_highlight", "\e[7;35;47m"},
       {"green_highlight", "\e[7;32;47m"},  {"dark_highlight", "\e[7;30;47m"},
       {"orange_highlight", "\e[4;37;43m"},
   };

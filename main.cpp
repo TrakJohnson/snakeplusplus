@@ -1,12 +1,11 @@
 #include "sys/ioctl.h"
 #include <array>
 #include <cstdlib>
+#include <ctime>
 #include <iostream>
 #include <ostream>
-#include <vector>
 #include <queue>
-#include <cstdlib>
-#include <ctime>
+#include <vector>
 
 #include "stdlib.h"
 
@@ -15,7 +14,6 @@
 #include "food.h"
 #include "internals.h"
 #include "menu_snake.h"
-
 
 void backgroundSetup(const int nx, const int ny, std::vector<int> &bg) {
   decltype(bg.size()) i;
@@ -131,7 +129,7 @@ void startGame(const int &nx, const int &ny,
   // and avoid eating yourself accidentally in between movement frames
   std::queue<std::array<int, 2>> dxdy_queue;
   dxdy_queue.push({-1, 0});
-  
+
   std::array<int, 2> food{0, 0};
   int points = 0;
   const int frameLength = 16;
@@ -146,7 +144,7 @@ void startGame(const int &nx, const int &ny,
       internal::frameSleep(frameLength);
       if (internal::keyEvent()) {
         std::cin >> key;
-	// modifies the queue inplace
+        // modifies the queue inplace
         snakeMovement(key, dxdy_queue);
       }
     }
@@ -187,12 +185,15 @@ int main() {
   const int ny = 25;
 
   // change the rand seed each time
-  srand((int) time(0));
-  
+  srand((int)time(0));
+
   std::vector<int> background(nx * ny, 0);
   std::vector<std::pair<int, int>> snake;
 
-  std::vector<std::string> choices{"1 joueur", "2 joueurs", "Quitter"};
+  std::vector<std::pair<std::string, std::string>> choices{
+      {"1 joueur", "Le snake classique"},
+      {"2 joueurs", "Affrontement sur un clavier. Touches joueur 2: OKLM"},
+      {"Quitter", "Adiøs"}};
   int choice{menuSelect(choices)};
 
   if (choice == 0) {

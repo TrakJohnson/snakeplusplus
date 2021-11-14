@@ -9,30 +9,41 @@
 #include "internals.h"
 #include "menu_snake.h"
 
-void printChoices(std::vector<std::string> &options, int selected,
-                  std::string selectedColor, std::string inactiveColor) {
+using menuentry = std::pair<std::string, std::string>;
+
+void printChoices(std::vector<menuentry> &options, int selected,
+                  std::string selectedColor, std::string inactiveColor,
+                  bool showTooltip,
+                  std::string tooltipColor) {
 
   // Pour un menu plaisant, on harmonise les largeurs de "boutons"
   // Calcul de la longeur pour que tout tienne
   std::vector<int> lengths;
   std::transform(std::begin(options), std::end(options),
                  std::back_inserter(lengths),
-                 [](std::string s) { return s.length(); });
+                 [](menuentry s) { return s.first.length(); });
   auto longestLength = *max_element(std::begin(lengths), std::end(lengths));
 
   for (int i = 0; i < options.size(); i++) {
     std::string finalText =
-      colorize(paddingFill(options.at(i), longestLength),
+        colorize(paddingFill(options.at(i).first, longestLength),
                  i == selected ? "green_highlight" : "dark_highlight");
-    
+
     // TODO fix this messy shit with colors
-    // TODO big align problems
-    printCenteredLine(finalText, "normal", longestLength);
+    printCenteredLine(finalText, "normal", longestLength + 2);
     printCenteredLine(" ");
+
+    // tooltips on each menu option
+  }
+  if (showTooltip) {
+    printCenteredLine(" ");
+    printCenteredLine(" ");
+    printCenteredLine(" ");
+    printCenteredLine(options.at(selected).second, tooltipColor);
   }
 }
 
-void printMenu(std::vector<std::string> &options, int selected) {
+void printMenu(std::vector<menuentry> &options, int selected) {
   backgroundClear();
   printTitle();
   printCenteredLine(" ");
@@ -41,10 +52,10 @@ void printMenu(std::vector<std::string> &options, int selected) {
   printCenteredLine("Sélectionnez avec A");
   printCenteredLine(" ");
   printCenteredLine(" ");
-  printChoices(options, selected, "pink_highlight", "dark_highlight");
+  printChoices(options, selected, "pink_highlight", "dark_highlight", true, "orange_highlight");
 }
 
-int menuSelect(std::vector<std::string> &options) {
+int menuSelect(std::vector<menuentry> &options) {
   char key;
   int selectedOption = 0;
 
