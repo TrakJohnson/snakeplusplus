@@ -1,4 +1,7 @@
+#include <algorithm>
 #include <iostream>
+#include <iterator>
+#include <ostream>
 #include <string>
 #include <vector>
 
@@ -6,25 +9,40 @@
 #include "internals.h"
 #include "menu_snake.h"
 
+void printChoices(std::vector<std::string> &options, int selected,
+                  std::string selectedColor, std::string inactiveColor) {
+
+  // Pour un menu plaisant, on harmonise les largeurs de "boutons"
+  // Calcul de la longeur pour que tout tienne
+  std::vector<int> lengths;
+  std::transform(std::begin(options), std::end(options),
+                 std::back_inserter(lengths),
+                 [](std::string s) { return s.length(); });
+  auto longestLength = *max_element(std::begin(lengths), std::end(lengths));
+
+  for (int i = 0; i < options.size(); i++) {
+    std::string finalText =
+      colorize(paddingFill(options.at(i), longestLength),
+                 i == selected ? "green_highlight" : "dark_highlight");
+    
+    // TODO fix this messy shit with colors
+    // TODO big align problems
+    printCenteredLine(finalText, "normal", longestLength);
+    printCenteredLine(" ");
+  }
+}
+
 void printMenu(std::vector<std::string> &options, int selected) {
   backgroundClear();
   printTitle();
   printCenteredLine(" ");
   printCenteredLine(" ");
-  printCenteredLine("Use ZQSD to navigate");
+  printCenteredLine("Utilisez les touches ZQSD pour la navigation");
+  printCenteredLine("Sélectionnez avec A");
   printCenteredLine(" ");
   printCenteredLine(" ");
-  for (int i = 0; i < options.size(); i++) {
-    printCenteredLine(" ");
-    if (i == selected) {
-      printCenteredLine(options.at(i), "pink_highlight");
-    } else {
-      printCenteredLine(options.at(i));
-    }    
-    printCenteredLine(" ");
-  }
+  printChoices(options, selected, "pink_highlight", "dark_highlight");
 }
-
 
 int menuSelect(std::vector<std::string> &options) {
   char key;
@@ -36,13 +54,13 @@ int menuSelect(std::vector<std::string> &options) {
     if (internal::keyEvent()) {
       std::cin >> key;
       if (key == 'z') {
-	selectedOption = (selectedOption - 1) % options.size();
-	printMenu(options, selectedOption);
+        selectedOption = (selectedOption - 1) % options.size();
+        printMenu(options, selectedOption);
       } else if (key == 's') {
-	selectedOption = (selectedOption + 1) % options.size();
-	printMenu(options, selectedOption);
+        selectedOption = (selectedOption + 1) % options.size();
+        printMenu(options, selectedOption);
       } else if (key == 'a') {
-	return selectedOption;
+        return selectedOption;
       }
     }
   }

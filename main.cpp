@@ -13,12 +13,6 @@
 #include "internals.h"
 #include "menu_snake.h"
 
-// TODO
-// # fix frames
-// - add animation for eating
-// - menu
-// - 2 players
-
 
 void backgroundSetup(const int nx, const int ny, std::vector<int> &bg) {
   decltype(bg.size()) i;
@@ -52,7 +46,6 @@ void remove_snake(const std::vector<std::pair<int, int>> &snake,
   }
 }
 
-
 std::array<int, 2> snakeMovement(const char &k, int dx, int dy) {
   int dx_new = 0;
   int dy_new = 0;
@@ -69,10 +62,10 @@ std::array<int, 2> snakeMovement(const char &k, int dx, int dy) {
     // Up
     dy_new = -1;
   }
-  
+
   std::array<int, 2> dxdy_old{dx, dy};
   // empêche l'utilisateur de se rentrer dedans "sur place"
-  if (dx_new*dx != 0 || dy_new*dy != 0) {
+  if (dx_new * dx != 0 || dy_new * dy != 0) {
     return dxdy_old;
   }
   std::array<int, 2> dxdy{dx_new, dy_new};
@@ -122,6 +115,10 @@ void update_snake_coordinates(std::vector<std::pair<int, int>> &snake,
   snake[0] = {nouveau_x, nouveau_y};
 }
 
+int speedToSlowMult(double s, int frameLength) {
+  return (int)(1000.0 / (s * frameLength));
+}
+
 void startGame(const int &nx, const int &ny,
                std::vector<std::pair<int, int>> &snake, std::vector<int> &bg) {
   char key;
@@ -129,7 +126,8 @@ void startGame(const int &nx, const int &ny,
   std::array<int, 2> food{0, 0};
   int points = 0;
   const int frameLength = 16;
-  int slowMult = 10;
+  double speed{6.0};
+  int slowMult{speedToSlowMult(speed, frameLength)};
 
   createFood(bg, food, nx, ny);
 
@@ -145,10 +143,10 @@ void startGame(const int &nx, const int &ny,
 
     backgroundClear();
     add_snake(snake, bg, nx, ny);
-    printFrame(nx, ny, bg, points, frameLength, slowMult);
+    printFrame(nx, ny, bg, points, frameLength, speed);
     remove_snake(snake, bg, nx, ny);
     update_snake_coordinates(snake, dxdy, nx, ny);
-    
+
     bool out = verifyBorder(snake, nx, ny);
     if (out == false) {
       std::cerr << "t'es mort" << std::endl;
@@ -158,7 +156,10 @@ void startGame(const int &nx, const int &ny,
     bool eat = eatFood(food, snake);
     if (eat) {
       points += 1;
-      slowMult -= (points % 3) / 2;  // accélère tous les 3
+      // maj de la vitesse
+      speed += 0.5;
+      slowMult = speedToSlowMult(speed, frameLength);
+      // nouvelle nourriture
       createFood(bg, food, nx, ny);
       snake.push_back({-1, -1});
     }
@@ -173,19 +174,17 @@ int main() {
   std::vector<int> background(nx * ny, 0);
   std::vector<std::pair<int, int>> snake;
 
-  printCenteredLine(std::string("Test"));
-  
-  std::vector<std::string> choices {
-    "1 joueur",
-    "2 joueurs",
-    "Quit"
-  };
-  int choice {menuSelect(choices)};
+  std::vector<std::string> choices{"1 joueur", "2 joueurs", "Quitter"};
+  int choice{menuSelect(choices)};
 
   if (choice == 0) {
+    // printChoices(choices, 0, "pink_highlight", "dark_highlight");
     backgroundSetup(nx, ny, background);
     setupSnake(snake, snake_init_sz);
     startGame(nx, ny, snake, background);
+  } else if (choice == 1) {
+    // TODO
+    return EXIT_FAILURE;
   } else if (choice == 2) {
     return EXIT_SUCCESS;
   }

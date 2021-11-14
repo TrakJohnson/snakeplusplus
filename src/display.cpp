@@ -2,14 +2,19 @@
 
 #include <array>
 #include <cmath>
+#include <iomanip>
 #include <iostream>
-#include <sstream>
+#include <map>
 #include <ostream>
+#include <sstream>
 #include <stdexcept>
 #include <stdio.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <vector>
+
+// ---
+// Terminal utils
 
 const char *cmd_clear = "clear";
 
@@ -28,55 +33,90 @@ std::pair<int, int> getTermDimensions() {
   return std::pair<int, int>{w.ws_row, w.ws_col};
 }
 
-std::string colorize(std::string s, std::string color) {
-  if (color == "orange_highlight") {
-    return std::string("\e[4;37;43m") + s + "\e[0m";
-  } else if (color == "pink_highlight") {
-    return std::string("\e[7;35;40m") + s + "\e[0m";
-  } else if (color == "normal") {
-    return s;
+// ---
+// String utils
+
+std::string trimDouble(double x, int precision) {
+  // precision 0 gives just the int
+  if (precision == 0) {
+    precision = -1; // to remove the dot
   }
-  // TODO ajouter les autres cas ici
-  throw std::invalid_argument(std::string("Color not found: ") + color);
-  return s;
+  return std::to_string(x).substr(0,
+                                  std::to_string(x).find(".") + precision + 1);
 }
 
-void printCenteredLine(std::string line, std::string color = "normal", int lineLength = -1, int charSizeModifier = 1) {
-  // charSizeModifier is 2 is your character is twice as wide as a normal one
-  
+std::string paddingFill(std::string &s, int finalLength) {
+  // go from
+  // |ab|
+  // |abc|
+  // |a|
+  // --> to
+  // | ab  |
+  // | abc |
+  // |  a  |
+  int l = s.length();
+  std::string additional = ((finalLength - l) % 2) ? " " : "";
+  std::string base = std::string((finalLength - l) / 2, ' ');
+  std::string padding = " ";
+  if (finalLength <= l) {
+    return padding + s + padding;
+  } else {
+    return padding + base + s + base + additional + padding;
+  }
+}
+
+std::string colorize(std::string s, std::string color) {
+  std::map<std::string, std::string> colors = {
+      {"orange_highlight", "\e[4;37;43m"}, {"pink_highlight", "\e[7;35;47m"},
+      {"green_highlight", "\e[7;32;47m"},  {"dark_highlight", "\e[7;30;47m"},
+      {"orange_highlight", "\e[4;37;43m"},
+  };
+
+  if (color == "normal") {
+    return s;
+  } else {
+    return colors.at(color) + s + "\e[0m";
+  }
+}
+
+void printCenteredLine(std::string line, std::string color = "normal",
+                       int lineLength = -1, int charSizeModifier = 1) {
+  // if charSizeModifier is 2, your character is twice as wide as a normal one
+
   if (lineLength == -1) {
     lineLength = line.length();
   }
   // std::cout << getTermDimensions().second << std::endl;
   int space = (getTermDimensions().second - charSizeModifier * lineLength) / 2;
-  std::cout << std::string(space, ' ') << colorize(line, color) << std::endl;
+  std::cout << std::setprecision(2) << std::string(space, ' ')
+            << colorize(line, color) << std::endl;
 }
 
 void printTitle() {
   std::array<std::string, 11> titre = {
-    "",
-    "  ██████  ███▄    █  ▄▄▄       ██ ▄█▀▓█████ ",
-    "▒██    ▒  ██ ▀█   █ ▒████▄     ██▄█▒ ▓█   ▀ ",
-    "░ ▓██▄   ▓██  ▀█ ██▒▒██  ▀█▄  ▓███▄░ ▒███   ",
-    "  ▒   ██▒▓██▒  ▐▌██▒░██▄▄▄▄██ ▓██ █▄ ▒▓█  ▄ ",
-    "▒██████▒▒▒██░   ▓██░ ▓█   ▓██▒▒██▒ █▄░▒████▒",
-    "▒ ▒▓▒ ▒ ░░ ▒░   ▒ ▒  ▒▒   ▓▒█░▒ ▒▒ ▓▒░░ ▒░ ░",
-    "░ ░▒  ░ ░░ ░░   ░ ▒░  ▒   ▒▒ ░░ ░▒ ▒░ ░ ░  ░",
-    "░  ░  ░     ░   ░ ░   ░   ▒   ░ ░░ ░    ░   ",
-    "      ░           ░       ░  ░░  ░      ░  ░",
-    ""};
+      "",
+      "  ██████  ███▄    █  ▄▄▄       ██ ▄█▀▓█████ ",
+      "▒██    ▒  ██ ▀█   █ ▒████▄     ██▄█▒ ▓█   ▀ ",
+      "░ ▓██▄   ▓██  ▀█ ██▒▒██  ▀█▄  ▓███▄░ ▒███   ",
+      "  ▒   ██▒▓██▒  ▐▌██▒░██▄▄▄▄██ ▓██ █▄ ▒▓█  ▄ ",
+      "▒██████▒▒▒██░   ▓██░ ▓█   ▓██▒▒██▒ █▄░▒████▒",
+      "▒ ▒▓▒ ▒ ░░ ▒░   ▒ ▒  ▒▒   ▓▒█░▒ ▒▒ ▓▒░░ ▒░ ░",
+      "░ ░▒  ░ ░░ ░░   ░ ▒░  ▒   ▒▒ ░░ ░▒ ▒░ ░ ░  ░",
+      "░  ░  ░     ░   ░ ░   ░   ▒   ░ ░░ ░    ░   ",
+      "      ░           ░       ░  ░░  ░      ░  ░",
+      ""};
 
   for (std::string s : titre) {
     // TODO: remplacer 44...
     // cpp ne semble pas connaître la taille d'un unicode
     // std::cout << titre[0].size() << " " << std::mbrlen(titre[0][0]);
-    
+
     printCenteredLine(s, "normal", 44);
-  }  
+  }
 }
 
 void printFrame(const int &nx, const int &ny, const std::vector<int> &bg,
-                int points, int frameLength, int slowMult) {
+                int points, int frameLength, double speed) {
   printTitle();
   // Jeu
   std::array<std::string, 5> colors{
@@ -96,12 +136,7 @@ void printFrame(const int &nx, const int &ny, const std::vector<int> &bg,
     printCenteredLine(line, "normal", nx, 2);
   }
   std::cout << std::endl;
-  
-  std::stringstream ss;
-  ss << "Points: " << points
-     << "\nVitesse: " << std::round(1000.0 / (slowMult * frameLength)) << " pixels/s"
-     << std::endl;
-  
+
   printCenteredLine(std::string("Points: ") + std::to_string(points));
-  printCenteredLine(std::string("Vitesse: ") + std::to_string((int)(1000.0 / (slowMult * frameLength))) + " px/s");
+  printCenteredLine(std::string("Vitesse: ") + trimDouble(speed, 1) + " px/s");
 }
